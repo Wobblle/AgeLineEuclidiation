@@ -48,38 +48,44 @@ Try the live service:
 ssh late.sh
 ```
 
-Install the companion CLI:
+Run it yourself (requires Docker):
+
+```bash
+git clone https://github.com/mpiorowski/late-sh
+cd late-sh
+make start
+```
+
+Then connect to your local instance:
+
+```bash
+ssh localhost -p 2222
+```
+
+That's it. Postgres, Icecast, and Liquidsoap all come up automatically.
+
+## Companion CLI
+
+Install the companion CLI for local audio playback and synced visualizer:
 
 ```bash
 curl -fsSL https://cli.late.sh/install.sh | bash
 ```
 
-Build from source:
+Or build it from source:
 
 ```bash
-git clone https://github.com/mpiorowski/late-sh
-cd late-sh
-mise install
+mise install        # optional — sets up the expected Rust toolchain
 cargo build --release --bin late
 ```
 
 ## Local Development
 
-Prerequisites:
-
-- Docker
-- Rust toolchain
-- `mise` recommended for matching repo tool versions
-
-Bring up infrastructure:
+For development without Docker wrapping the Rust builds, you can run the
+infrastructure in Docker and the apps natively:
 
 ```bash
 docker compose up -d postgres icecast liquidsoap
-```
-
-Run the apps locally:
-
-```bash
 cargo run -p late-ssh
 cargo run -p late-web
 ```
@@ -91,16 +97,18 @@ export CARGO_TARGET_DIR=/target
 export CARGO_HOME=$HOME/.cargo
 ```
 
+Use `mise install` to get the expected Rust toolchain, `mold` linker, and
+`cargo-nextest`.
+
 ## Verification
 
-Typical local verification commands:
+Run before opening a PR:
 
 ```bash
-cargo fmt --all -- --check
-cargo clippy --workspace --all-targets -- -D warnings
-cargo nextest run --workspace --all-targets
+make check
 ```
 
+This runs `cargo fmt --check`, `cargo clippy`, and `cargo nextest`.
 Some integration tests require Docker via testcontainers.
 
 ## Contributing
