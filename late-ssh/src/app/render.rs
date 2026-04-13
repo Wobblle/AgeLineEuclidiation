@@ -482,6 +482,12 @@ fn draw_help_overlay(
         key("h / l", "switch room"),
         key("i", "compose"),
         key("/help", "all commands & keys"),
+        Line::from(""),
+        section("Profile"),
+        divider(col_w),
+        key("j / k", "navigate"),
+        key("i", "edit username"),
+        key("Space", "toggle"),
     ];
 
     // ── Right column ──
@@ -506,12 +512,6 @@ fn draw_help_overlay(
         key("Enter", "submit / copy URL"),
         key("Esc", "cancel URL entry"),
         key("d", "delete (own)"),
-        Line::from(""),
-        section("Profile"),
-        divider(col_w),
-        key("j / k", "navigate"),
-        key("i", "edit username"),
-        key("Space", "toggle"),
         Line::from(""),
         section("The Arcade"),
         divider(col_w),

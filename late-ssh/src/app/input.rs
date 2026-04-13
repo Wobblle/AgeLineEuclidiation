@@ -232,8 +232,9 @@ impl Perform for VtCollector {
             'F' if intermediates.is_empty() && p0.unwrap_or(0) <= 1 => {
                 self.events.push(ParsedInput::End);
             }
-            // Kitty keyboard protocol: CSI 127;5u == Ctrl+Backspace.
-            'u' if p0 == Some(127) && p1 == Some(5) => {
+            // Kitty keyboard protocol: some terminals report Backspace as
+            // codepoint 127, others as 8 (BS). Accept both for Ctrl+Backspace.
+            'u' if (p0 == Some(127) || p0 == Some(8)) && p1 == Some(5) => {
                 self.events.push(ParsedInput::CtrlBackspace);
             }
             'M' | 'm' if intermediates == [b'<'] && params.len() >= 3 => {
@@ -436,6 +437,16 @@ fn handle_parsed_input(app: &mut App, event: ParsedInput) {
         }
         ParsedInput::End => handle_scroll_for_screen(app, ctx.screen, isize::MIN),
         ParsedInput::CtrlBackspace
+            if (ctx.screen == Screen::Chat || ctx.screen == Screen::Dashboard)
+                && ctx.chat_composing =>
+        {
+            app.chat.composer_delete_word_left();
+            app.chat.update_autocomplete();
+        }
+        // Many terminals encode Ctrl+Backspace as raw BS (^H / 0x08) rather
+        // than a distinct escape sequence. Treat that as delete-word-left in
+        // the chat composer; plain Backspace continues to come through as DEL.
+        ParsedInput::Byte(0x08)
             if (ctx.screen == Screen::Chat || ctx.screen == Screen::Dashboard)
                 && ctx.chat_composing =>
         {
@@ -896,6 +907,7 @@ mod tests {
             parser.feed(b"\x1b[127;5u"),
             vec![ParsedInput::CtrlBackspace]
         );
+        assert_eq!(parser.feed(b"\x1b[8;5u"), vec![ParsedInput::CtrlBackspace]);
         assert_eq!(parser.feed(b"\x1b[8;5~"), vec![ParsedInput::CtrlBackspace]);
     }
 
