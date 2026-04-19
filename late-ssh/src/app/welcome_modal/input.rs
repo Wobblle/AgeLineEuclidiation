@@ -95,6 +95,7 @@ fn handle_bio_input(app: &mut App, event: ParsedInput) {
         ParsedInput::Byte(b'\r') => app.welcome_modal_state.stop_bio_edit(),
         ParsedInput::AltEnter | ParsedInput::Byte(b'\n') => app.welcome_modal_state.bio_push('\n'),
         ParsedInput::Byte(0x15) => composer.clear(),
+        ParsedInput::Byte(0x17) => composer.delete_word_left(),
         ParsedInput::Byte(0x7F) => composer.backspace(),
         ParsedInput::Delete => composer.delete_right(),
         ParsedInput::CtrlBackspace | ParsedInput::Byte(0x08) => composer.delete_word_left(),

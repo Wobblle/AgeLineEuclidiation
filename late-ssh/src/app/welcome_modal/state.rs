@@ -25,13 +25,13 @@ pub enum Row {
     Bio,
     Theme,
     BackgroundColor,
+    Country,
+    Timezone,
     DirectMessages,
     Mentions,
     GameEvents,
     Bell,
     Cooldown,
-    Country,
-    Timezone,
     Save,
 }
 
@@ -41,13 +41,13 @@ impl Row {
         Row::Bio,
         Row::Theme,
         Row::BackgroundColor,
+        Row::Country,
+        Row::Timezone,
         Row::DirectMessages,
         Row::Mentions,
         Row::GameEvents,
         Row::Bell,
         Row::Cooldown,
-        Row::Country,
-        Row::Timezone,
         Row::Save,
     ];
 }
