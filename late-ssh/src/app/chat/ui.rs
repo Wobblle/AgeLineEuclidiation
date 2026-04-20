@@ -1279,44 +1279,49 @@ mod tests {
 
     #[test]
     fn empty_composer_placeholder_is_dim_while_composing() {
+        use ratatui::{Terminal, backend::TestBackend};
+
         let ta = TextArea::default();
         let view = composer_view(&ta);
         let placeholder = empty_composer_placeholder(&view);
+        let width = 20u16;
+        let backend = TestBackend::new(width, 1);
+        let mut terminal = Terminal::new(backend).expect("term");
 
-        assert_eq!(placeholder.line_count(80), 1);
-        let line = placeholder
-            .text
-            .lines
-            .first()
-            .expect("placeholder line should exist");
+        terminal
+            .draw(|f| f.render_widget(placeholder, Rect::new(0, 0, width, 1)))
+            .unwrap();
 
-        assert_eq!(line.spans.len(), 2);
-        assert_eq!(line.spans[0].content.as_ref(), "T");
-        assert_eq!(line.spans[0].style.fg, Some(theme::BG_CANVAS()));
-        assert_eq!(line.spans[0].style.bg, Some(theme::TEXT_DIM()));
-        assert_eq!(line.spans[1].content.as_ref(), "ype a message...");
-        assert_eq!(line.spans[1].style.fg, Some(theme::TEXT_DIM()));
+        let buf = terminal.backend().buffer();
+        let rendered: String = (0..17).map(|x| buf[(x, 0)].symbol()).collect();
+        assert_eq!(rendered, "Type a message...");
+        assert_eq!(buf[(0, 0)].fg, theme::BG_CANVAS());
+        assert_eq!(buf[(0, 0)].bg, theme::TEXT_DIM());
+        assert_eq!(buf[(1, 0)].fg, theme::TEXT_DIM());
     }
 
     #[test]
     fn empty_composer_placeholder_uses_hint_text_when_not_composing() {
+        use ratatui::{Terminal, backend::TestBackend};
+
         let ta = TextArea::default();
         let mut view = composer_view(&ta);
         view.composing = false;
 
         let placeholder = empty_composer_placeholder(&view);
-        let line = placeholder
-            .text
-            .lines
-            .first()
-            .expect("placeholder line should exist");
+        let expected = "Type a message · j/k select · /help";
+        let width = expected.chars().count() as u16;
+        let backend = TestBackend::new(width, 1);
+        let mut terminal = Terminal::new(backend).expect("term");
 
-        assert_eq!(line.spans.len(), 1);
-        assert_eq!(
-            line.spans[0].content.as_ref(),
-            "Type a message · j/k select · /help"
-        );
-        assert_eq!(line.spans[0].style.fg, Some(theme::TEXT_DIM()));
+        terminal
+            .draw(|f| f.render_widget(placeholder, Rect::new(0, 0, width, 1)))
+            .unwrap();
+
+        let buf = terminal.backend().buffer();
+        let rendered: String = (0..width).map(|x| buf[(x, 0)].symbol()).collect();
+        assert_eq!(rendered, expected);
+        assert_eq!(buf[(0, 0)].fg, theme::TEXT_DIM());
     }
 
     #[test]
