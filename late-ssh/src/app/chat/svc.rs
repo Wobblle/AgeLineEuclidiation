@@ -326,9 +326,9 @@ impl ChatService {
                    )
                  GROUP BY r.id, r.slug
                  ORDER BY
-                    member_count DESC,
+                    COALESCE(last_message_at, r.created) DESC,
                     message_count DESC,
-                    last_message_at DESC NULLS LAST,
+                    member_count DESC,
                     r.slug ASC",
                 &[&user_id],
             )
