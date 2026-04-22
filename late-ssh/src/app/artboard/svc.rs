@@ -16,6 +16,7 @@ pub struct DartboardSnapshot {
     pub canvas: Canvas,
     pub provenance: ArtboardProvenance,
     pub peers: Vec<Peer>,
+    pub your_name: String,
     pub your_user_id: Option<UserId>,
     pub your_color: Option<RgbColor>,
     pub last_seq: Seq,
@@ -65,18 +66,19 @@ impl DartboardService {
         username: &str,
         shared_provenance: SharedArtboardProvenance,
     ) -> Self {
+        let username = username.to_string();
         let hello = Hello {
-            name: username.to_string(),
-            color: preferred_user_color(user_id),
+            name: username.clone(),
+            color: requested_user_color_hint(user_id),
         };
         let initial_snapshot = DartboardSnapshot {
+            your_name: username.clone(),
             provenance: clone_shared_provenance(&shared_provenance),
             ..Default::default()
         };
         let (snapshot_tx, snapshot_rx) = watch::channel(initial_snapshot);
         let (event_tx, _) = broadcast::channel(128);
         let (command_tx, command_rx) = mpsc::channel();
-        let username = username.to_string();
 
         match server.try_connect_local(hello) {
             ConnectOutcome::Accepted(client) => {
@@ -100,6 +102,7 @@ impl DartboardService {
             }
             ConnectOutcome::Rejected(reason) => {
                 let rejected_snapshot = DartboardSnapshot {
+                    your_name: username,
                     provenance: clone_shared_provenance(&shared_provenance),
                     connect_rejected: Some(reason),
                     ..Default::default()
@@ -145,10 +148,10 @@ impl DartboardService {
     }
 }
 
-fn preferred_user_color(user_id: Uuid) -> RgbColor {
+fn requested_user_color_hint(user_id: Uuid) -> RgbColor {
     const PALETTE: [RgbColor; 8] = [
         RgbColor::new(255, 110, 64),
-        RgbColor::new(255, 196, 64),
+        RgbColor::new(255, 236, 96),
         RgbColor::new(145, 226, 88),
         RgbColor::new(72, 220, 170),
         RgbColor::new(84, 196, 255),
@@ -234,6 +237,7 @@ fn handle_server_msg(
                 canvas: snapshot,
                 provenance: clone_shared_provenance(shared_provenance),
                 peers,
+                your_name: username.to_string(),
                 your_user_id: Some(your_user_id),
                 your_color: Some(your_color),
                 last_seq: 0,

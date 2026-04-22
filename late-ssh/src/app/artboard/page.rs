@@ -3,6 +3,8 @@ use crate::app::{
     state::App,
 };
 
+use super::ui::{info_hit, swatch_hit};
+
 const VIEW_MODE_ALT_PAN_STEP: isize = 4;
 
 pub(crate) fn handle_key(app: &mut App, byte: u8) -> bool {
@@ -130,6 +132,24 @@ pub(crate) fn handle_event(app: &mut App, event: &ParsedInput) -> bool {
         {
             let action = super::input::handle_event(state, size, event);
             handle_action(app, action)
+        }
+        ParsedInput::Mouse(mouse)
+            if matches!(mouse.kind, MouseEventKind::Down)
+                && matches!(mouse.button, Some(MouseButton::Left))
+                && !mouse.modifiers.shift
+                && !mouse.modifiers.alt
+                && !mouse.modifiers.ctrl =>
+        {
+            if swatch_hit(size, state, mouse.x, mouse.y).is_some()
+                || info_hit(size, state, mouse.x, mouse.y)
+            {
+                return true;
+            }
+            if !state.move_to_screen_point(size, mouse.x, mouse.y) {
+                return false;
+            }
+            app.activate_artboard_interaction();
+            true
         }
         ParsedInput::Mouse(mouse) => handle_view_mode_mouse(state, size, mouse),
         _ => false,

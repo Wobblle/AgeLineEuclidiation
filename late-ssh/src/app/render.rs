@@ -645,6 +645,7 @@ fn app_frame_title(screen: Screen, ctx: &DrawContext<'_>) -> Line<'static> {
         let hints: &[(&str, &str)] = if ctx.artboard_interacting {
             &[
                 ("active", "draw"),
+                ("Space", "drop"),
                 ("Esc", "view"),
                 ("Ctrl+\\", "owners"),
                 ("Ctrl+P", "help"),

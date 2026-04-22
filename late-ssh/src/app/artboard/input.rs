@@ -646,7 +646,7 @@ mod tests {
     }
 
     #[test]
-    fn swatch_overlay_pointer_events_do_not_reveal_hidden_preview() {
+    fn swatch_overlay_pointer_events_keep_preview_active_until_canvas_move() {
         let mut state = test_state();
         state.snapshot.canvas = Canvas::with_size(40, 20);
         state.set_viewport_for_screen((80, 24));
@@ -668,7 +668,7 @@ mod tests {
             },
         );
         assert!(matches!(down, InputAction::Handled));
-        assert!(state.floating_view().is_none());
+        assert!(state.floating_view().is_some());
 
         let up = handle_mouse(
             &mut state,
@@ -682,7 +682,7 @@ mod tests {
             },
         );
         assert!(matches!(up, InputAction::Handled));
-        assert!(state.floating_view().is_none());
+        assert!(state.floating_view().is_some());
 
         let moved_over_swatch = handle_mouse(
             &mut state,
@@ -696,7 +696,7 @@ mod tests {
             },
         );
         assert!(matches!(moved_over_swatch, InputAction::Handled));
-        assert!(state.floating_view().is_none());
+        assert!(state.floating_view().is_some());
 
         let moved_over_canvas = handle_mouse(
             &mut state,

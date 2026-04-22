@@ -13,7 +13,7 @@ use ratatui::{
 use crate::app::{common::theme, games::ui::info_label_value};
 
 use super::data::lines_for;
-use super::state::{BrushMode, HelpTab, State};
+use super::state::{BrushMode, HelpTab, PRIMARY_SWATCH_IDX, State};
 
 const INFO_WIDTH: u16 = 28;
 const SWATCH_BOX_WIDTH: u16 = 16;
@@ -22,6 +22,7 @@ const SWATCH_BOTTOM_CLEARANCE: u16 = 1;
 const SWATCH_NOTICE_CLEARANCE: u16 = 1;
 const PIN_UNPINNED: char = '📌';
 const PIN_PINNED: char = '📍';
+const PRIMARY_SWATCH_LABEL: [char; 2] = ['C', 'B'];
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub(crate) enum SwatchHit {
@@ -127,26 +128,42 @@ fn artboard_info_lines(state: &State, interacting: bool) -> Vec<Line<'static>> {
         selection_value,
         selection_color,
     ));
-    let mut peers = state.snapshot.peers.clone();
-    peers.sort_by_key(|peer| {
-        (
-            peer.user_id != state.snapshot.your_user_id.unwrap_or_default(),
-            peer.name.to_ascii_lowercase(),
-        )
-    });
-    if !peers.is_empty() {
+    let mut users = Vec::new();
+    if !state.snapshot.your_name.is_empty() {
+        users.push((
+            state.snapshot.your_name.clone(),
+            state
+                .snapshot
+                .your_color
+                .map(rgb)
+                .unwrap_or_else(theme::TEXT_BRIGHT),
+            true,
+        ));
+    }
+    let mut peers: Vec<_> = state
+        .snapshot
+        .peers
+        .iter()
+        .filter(|peer| Some(peer.user_id) != state.snapshot.your_user_id)
+        .cloned()
+        .collect();
+    peers.sort_by_key(|peer| peer.name.to_ascii_lowercase());
+    users.extend(
+        peers
+            .into_iter()
+            .map(|peer| (peer.name, rgb(peer.color), false)),
+    );
+    if !users.is_empty() {
         lines.push(Line::from(""));
-        lines.push(section_label("Peers"));
-        for peer in peers {
-            let suffix = if Some(peer.user_id) == state.snapshot.your_user_id {
-                " (you)"
-            } else {
-                ""
-            };
+        lines.push(section_label("Users"));
+        for (name, color, is_you) in users {
             lines.push(Line::from(vec![
                 Span::styled("• ", Style::default().fg(theme::TEXT_DIM())),
-                Span::styled(peer.name, Style::default().fg(rgb(peer.color))),
-                Span::styled(suffix, Style::default().fg(theme::TEXT_FAINT())),
+                Span::styled(name, Style::default().fg(color)),
+                Span::styled(
+                    if is_you { " (you)" } else { "" },
+                    Style::default().fg(theme::TEXT_FAINT()),
+                ),
             ]));
         }
     }
@@ -326,7 +343,10 @@ pub(crate) fn swatch_hit(
 
     for (idx, maybe_rect) in boxes.iter().enumerate() {
         let Some(rect) = maybe_rect else { continue };
-        if state.swatches()[idx].is_some() && rect_contains(swatch_pin_rect(*rect), col, row) {
+        if state.swatches()[idx].is_some()
+            && state.swatch_is_pinnable(idx)
+            && rect_contains(swatch_pin_rect(*rect), col, row)
+        {
             return Some(SwatchHit::Pin(idx));
         }
     }
@@ -372,6 +392,7 @@ fn render_swatch_strip(
         render_swatch_box_contents(
             frame.buffer_mut(),
             *rect,
+            idx,
             state.swatches()[idx].as_ref(),
             active_idx == Some(idx),
             active_idx == Some(idx) && is_transparent,
@@ -485,6 +506,7 @@ fn render_swatch_strip_frame(
 fn render_swatch_box_contents(
     buf: &mut Buffer,
     rect: Rect,
+    idx: usize,
     swatch: Option<&Swatch>,
     _is_active: bool,
     is_transparent: bool,
@@ -502,24 +524,36 @@ fn render_swatch_box_contents(
     if let Some(swatch) = swatch {
         render_swatch_preview(buf, inner, &swatch.clipboard);
         let pin_rect = swatch_pin_rect(rect);
-        let pin_char = if swatch.pinned {
-            PIN_PINNED
+        if idx == PRIMARY_SWATCH_IDX {
+            let label_style = Style::default()
+                .bg(theme::BG_CANVAS())
+                .fg(theme::TEXT_FAINT());
+            buf[(pin_rect.x, pin_rect.y)]
+                .set_char(PRIMARY_SWATCH_LABEL[0])
+                .set_style(label_style);
+            buf[(pin_rect.x + 1, pin_rect.y)]
+                .set_char(PRIMARY_SWATCH_LABEL[1])
+                .set_style(label_style);
         } else {
-            PIN_UNPINNED
-        };
-        let pin_style = Style::default()
-            .bg(theme::BG_CANVAS())
-            .fg(if swatch.pinned {
-                theme::BORDER_ACTIVE()
+            let pin_char = if swatch.pinned {
+                PIN_PINNED
             } else {
-                theme::TEXT_FAINT()
-            });
-        buf[(pin_rect.x, pin_rect.y)]
-            .set_char(pin_char)
-            .set_style(pin_style);
-        buf[(pin_rect.x + 1, pin_rect.y)]
-            .set_char(' ')
-            .set_style(pin_style);
+                PIN_UNPINNED
+            };
+            let pin_style = Style::default()
+                .bg(theme::BG_CANVAS())
+                .fg(if swatch.pinned {
+                    theme::BORDER_ACTIVE()
+                } else {
+                    theme::TEXT_FAINT()
+                });
+            buf[(pin_rect.x, pin_rect.y)]
+                .set_char(pin_char)
+                .set_style(pin_style);
+            buf[(pin_rect.x + 1, pin_rect.y)]
+                .set_char(' ')
+                .set_style(pin_style);
+        }
     }
 
     if is_transparent {
@@ -849,7 +883,7 @@ mod tests {
         let state = test_state();
         assert_eq!(
             artboard_info_area_for_screen((80, 24), &state),
-            Some(Rect::new(27, 1, 28, 9))
+            Some(Rect::new(27, 1, 28, 12))
         );
     }
 
@@ -941,6 +975,9 @@ mod tests {
         assert_eq!(lines[4].to_string(), "Pan        ◀ ▲ ▼ ▶");
         assert_eq!(lines[5].to_string(), "Brush      none");
         assert_eq!(lines[6].to_string(), "Selection  none");
+        assert_eq!(lines[7].to_string(), "");
+        assert_eq!(lines[8].to_string(), "Users");
+        assert_eq!(lines[9].to_string(), "• painter (you)");
     }
 
     #[test]
@@ -1011,6 +1048,13 @@ mod tests {
             clipboard: Clipboard::new(1, 1, vec![Some(CellValue::Narrow('A'))]),
             pinned: false,
         });
+        state.editor.swatches[1] = Some(dartboard_editor::Swatch {
+            clipboard: Clipboard::new(1, 1, vec![Some(CellValue::Narrow('B'))]),
+            pinned: false,
+        });
+        let rects = swatch_box_rects((80, 24), &state);
+        let second = rects[1].expect("second swatch visible");
+        let second_pin = swatch_pin_rect(second);
 
         assert_eq!(
             swatch_hit((80, 24), &state, 11, 16),
@@ -1018,7 +1062,11 @@ mod tests {
         );
         assert_eq!(
             swatch_hit((80, 24), &state, 23, 21),
-            Some(SwatchHit::Pin(0))
+            Some(SwatchHit::Body(0))
+        );
+        assert_eq!(
+            swatch_hit((80, 24), &state, second_pin.x + 1, second_pin.y + 1),
+            Some(SwatchHit::Pin(1))
         );
     }
 
@@ -1115,6 +1163,7 @@ mod tests {
         let shared_provenance = ArtboardProvenance::default().shared();
         let snapshot = DartboardSnapshot {
             provenance: ArtboardProvenance::default(),
+            your_name: "painter".to_string(),
             your_user_id: Some(1),
             your_color: Some(RgbColor::new(255, 196, 64)),
             ..Default::default()
