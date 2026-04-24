@@ -750,6 +750,7 @@ impl App {
         if self.screen == Screen::Artboard {
             self.deactivate_artboard_interaction();
             self.leave_dartboard();
+            self.force_full_repaint();
         }
 
         self.screen = screen;
@@ -809,8 +810,12 @@ impl App {
     /// Reset the terminal diff state so the next `render()` emits a full frame.
     /// Used after dropped SSH frames and by integration test helpers.
     pub fn reset_render(&mut self) {
-        let _ = self.terminal.clear();
+        self.force_full_repaint();
         self.shared.take();
+    }
+
+    pub(crate) fn force_full_repaint(&mut self) {
+        let _ = self.terminal.clear();
     }
 
     pub fn enter_alt_screen() -> Vec<u8> {

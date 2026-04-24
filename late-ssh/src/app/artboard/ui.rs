@@ -1,6 +1,6 @@
-use dartboard_core::CellValue;
+use dartboard_core::{Canvas, CellValue, Pos};
 use dartboard_editor::{Clipboard, SWATCH_CAPACITY, Swatch};
-use dartboard_tui::{CanvasStyle, CanvasWidget, CanvasWidgetState};
+use dartboard_tui::{CanvasStyle, CanvasWidgetState, SelectionView};
 use ratatui::{
     Frame,
     buffer::Buffer,
@@ -303,9 +303,11 @@ fn draw_canvas(
     if let Some(floating) = state.floating_view() {
         canvas_state = canvas_state.floating(floating);
     }
-    frame.render_widget(
-        CanvasWidget::new(&canvas_state).style(dartboard_canvas_style()),
+    render_canvas_widget(
+        frame.buffer_mut(),
         canvas_area,
+        &canvas_state,
+        dartboard_canvas_style(),
     );
 
     if let Some(notice) = &state.private_notice {
@@ -350,6 +352,115 @@ fn draw_canvas(
             frame.set_cursor_position((cx, cy));
         }
     }
+}
+
+fn render_canvas_widget(
+    buf: &mut Buffer,
+    area: Rect,
+    state: &CanvasWidgetState<'_>,
+    style: CanvasStyle,
+) {
+    let canvas = state.canvas;
+    let cw = canvas.width;
+    let ch = canvas.height;
+    let ox = state.viewport_origin.x;
+    let oy = state.viewport_origin.y;
+    let selection = state.selection;
+
+    for dy in 0..area.height {
+        for dx in 0..area.width {
+            let screen_x = area.x + dx;
+            let screen_y = area.y + dy;
+            let x = ox + dx as usize;
+            let y = oy + dy as usize;
+            let cell = &mut buf[(screen_x, screen_y)];
+            cell.reset();
+
+            if x >= cw || y >= ch {
+                cell.set_char(' ').set_bg(style.oob_bg);
+                continue;
+            }
+
+            let pos = Pos { x, y };
+            let cell_value = canvas.cell(pos);
+            let glyph_fg = canvas.fg(pos).map(rgb).unwrap_or(style.default_glyph_fg);
+            let selected = selection
+                .map(|selection| selection_covers_cell(canvas, selection, pos))
+                .unwrap_or(false);
+
+            let cell_style = if selected {
+                Style::default()
+                    .bg(style.selection_bg)
+                    .fg(style.selection_fg)
+            } else {
+                Style::default().fg(glyph_fg)
+            };
+
+            match cell_value {
+                Some(CellValue::Narrow(ch) | CellValue::Wide(ch)) => {
+                    buf.set_string(screen_x, screen_y, ch.to_string(), cell_style);
+                }
+                Some(CellValue::WideCont) | None => {
+                    cell.set_char(' ').set_style(cell_style);
+                }
+            }
+        }
+    }
+
+    if let Some(floating) = state.floating {
+        let active_fg = rgb(floating.active_color);
+        for cy in 0..floating.height {
+            for cx in 0..floating.width {
+                let canvas_x = floating.anchor.x + cx;
+                let canvas_y = floating.anchor.y + cy;
+
+                if canvas_x >= cw || canvas_y >= ch || canvas_x < ox || canvas_y < oy {
+                    continue;
+                }
+
+                let dx = (canvas_x - ox) as u16;
+                let dy = (canvas_y - oy) as u16;
+                if dx >= area.width || dy >= area.height {
+                    continue;
+                }
+
+                let screen_x = area.x + dx;
+                let screen_y = area.y + dy;
+                let cell = &mut buf[(screen_x, screen_y)];
+                let cell_style = Style::default().bg(style.floating_bg).fg(active_fg);
+                match floating.cells[cy * floating.width + cx] {
+                    Some(CellValue::Narrow(ch) | CellValue::Wide(ch)) => {
+                        buf.set_string(screen_x, screen_y, ch.to_string(), cell_style);
+                    }
+                    Some(CellValue::WideCont) => {
+                        cell.set_bg(style.floating_bg);
+                    }
+                    None if !floating.transparent => {
+                        cell.set_char(' ').set_bg(style.floating_bg);
+                    }
+                    None => {}
+                }
+            }
+        }
+    }
+}
+
+fn selection_covers_cell(canvas: &Canvas, selection: SelectionView, pos: Pos) -> bool {
+    if selection.contains(pos) {
+        return true;
+    }
+    let Some(origin) = canvas.glyph_origin(pos) else {
+        return false;
+    };
+    let Some(glyph) = canvas.glyph_at(origin) else {
+        return false;
+    };
+    (0..glyph.width).any(|dx| {
+        selection.contains(Pos {
+            x: origin.x + dx,
+            y: origin.y,
+        })
+    })
 }
 
 fn canvas_cursor_render_pos(state: &State) -> dartboard_core::Pos {

@@ -1117,7 +1117,7 @@ async fn render_once(
         // write is dropped, force the next successful frame to repaint from a
         // blank previous buffer so old terminal cells cannot leak through.
         let mut app = app.lock().await;
-        app.reset_render();
+        app.force_full_repaint();
         if !signal.dirty.swap(true, Ordering::AcqRel) {
             signal.notify.notify_one();
         }
