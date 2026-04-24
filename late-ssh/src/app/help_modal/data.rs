@@ -8,17 +8,19 @@ pub enum HelpTopic {
     Music,
     News,
     Arcade,
+    Artboard,
     Bonsai,
     Settings,
 }
 
 impl HelpTopic {
-    pub const ALL: [HelpTopic; 8] = [
+    pub const ALL: [HelpTopic; 9] = [
         HelpTopic::Overview,
         HelpTopic::Chat,
         HelpTopic::Music,
         HelpTopic::News,
         HelpTopic::Arcade,
+        HelpTopic::Artboard,
         HelpTopic::Bonsai,
         HelpTopic::Settings,
         HelpTopic::Architecture,
@@ -32,6 +34,7 @@ impl HelpTopic {
             HelpTopic::Music => "Music",
             HelpTopic::News => "News",
             HelpTopic::Arcade => "Arcade",
+            HelpTopic::Artboard => "Artboard",
             HelpTopic::Bonsai => "Bonsai",
             HelpTopic::Settings => "Settings",
         }
@@ -45,6 +48,7 @@ impl HelpTopic {
             HelpTopic::Music => "Music",
             HelpTopic::News => "News",
             HelpTopic::Arcade => "Arcade",
+            HelpTopic::Artboard => "Art",
             HelpTopic::Bonsai => "Bonsai",
             HelpTopic::Settings => "Settings",
         }
@@ -57,9 +61,10 @@ impl HelpTopic {
             HelpTopic::Music => 2,
             HelpTopic::News => 3,
             HelpTopic::Arcade => 4,
-            HelpTopic::Bonsai => 5,
-            HelpTopic::Settings => 6,
-            HelpTopic::Architecture => 7,
+            HelpTopic::Artboard => 5,
+            HelpTopic::Bonsai => 6,
+            HelpTopic::Settings => 7,
+            HelpTopic::Architecture => 8,
         }
     }
 }
@@ -72,6 +77,7 @@ pub fn lines_for(topic: HelpTopic) -> Vec<String> {
         HelpTopic::Music => music_help_lines(),
         HelpTopic::News => news_help_lines(),
         HelpTopic::Arcade => arcade_help_lines(),
+        HelpTopic::Artboard => artboard_help_lines(),
         HelpTopic::Bonsai => bonsai_help_lines(),
         HelpTopic::Settings => settings_help_lines(),
     }
@@ -330,6 +336,62 @@ fn arcade_help_lines() -> Vec<String> {
         "Why it exists",
         "",
         "It gives the app a slower social loop than chat: drop in, play a run, show up on the board, come back tomorrow.",
+    ]
+    .into_iter()
+    .map(str::to_string)
+    .collect()
+}
+
+fn artboard_help_lines() -> Vec<String> {
+    [
+        "Artboard",
+        "",
+        "The Artboard is a shared, persistent ASCII canvas. Everyone paints on the same live board from the dedicated screen.",
+        "",
+        "Where to find it",
+        "  4                 open the Artboard screen",
+        "  Tab / Shift+Tab   cycle to it from other screens",
+        "  https://late.sh/gallery",
+        "                    web gallery for Artboard snapshots",
+        "",
+        "Modes",
+        "  view mode         inspect and pan without editing",
+        "  active mode       type, erase, select, stamp, and draw",
+        "  i / Enter         enter active mode from live view",
+        "  Esc               return to view mode or dismiss local editor state",
+        "",
+        "Important keys",
+        "  ?                 toggle Artboard page help in view mode",
+        "  Ctrl+P            toggle Artboard help while editing",
+        "  g                 open daily/monthly snapshot browser",
+        "  Ctrl+\\           toggle owner overlay",
+        "  Ctrl+]            open emoji / Unicode glyph picker",
+        "",
+        "Drawing basics",
+        "  arrows            move cursor / focus",
+        "  Home / End        jump to line edges",
+        "  PgUp / PgDn       jump vertically",
+        "  <type>            draw a character",
+        "  Space             erase",
+        "  Shift+arrows      start or extend a selection",
+        "  Ctrl+C / Ctrl+X   copy or cut selection into swatches",
+        "  Ctrl+A/S/D/F/G    activate swatch slots 1..5",
+        "  Enter / Ctrl+V    stamp the floating brush",
+        "",
+        "Snapshots and gallery",
+        "  live board saves every 5 minutes and on shutdown",
+        "  daily snapshots are archived as daily:YYYY-MM-DD",
+        "  the newest 7 daily snapshots are kept",
+        "  monthly snapshots are archived as monthly:YYYY-MM",
+        "  on UTC month rollover, the prior daily snapshot becomes the monthly archive and the live board resets blank",
+        "  Artboard view mode g opens the terminal snapshot gallery",
+        "  web gallery is public at https://late.sh/gallery",
+        "",
+        "What is shared",
+        "  canvas cells, connected peers, your assigned color, and cell ownership provenance",
+        "",
+        "What stays local",
+        "  cursor, viewport, selections, swatches, brush previews, glyph search, and help scroll",
     ]
     .into_iter()
     .map(str::to_string)

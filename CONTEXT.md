@@ -3,7 +3,7 @@
 ## Metadata
 - Domain: late.sh - Terminal Clubhouse for Developers
 - Primary audience: LLM agents working on this codebase, human contributors
-- Last updated: 2026-04-24 (Reaction DB constraint expanded to 1..8)
+- Last updated: 2026-04-24 (Artboard global help/gallery context)
 - Status: Active
 - Stability note: Sections marked `[STABLE]` should change rarely. Sections marked `[VOLATILE]` are expected to change often.
 
@@ -520,6 +520,7 @@ The artboard is keyboard-first, but it is not "just type into a grid". It layers
 - `view` mode: inspect the board, move the cursor/viewport, and keep global page switching (`1-4`, `Tab`, `Shift+Tab`) available.
 - `active` mode: edit the board. Single-key global shortcuts are suppressed so typing goes to the canvas/editor.
 - `snapshot` view: read-only historical daily/monthly archive view. `g` in Artboard view mode opens the snapshot browser; `j/k` or arrows move, `Enter` selects, the top row returns to the live board, and `g` exits an active historical snapshot back to live.
+- The public web gallery for Artboard snapshots is `https://late.sh/gallery`.
 
 ```text
 type chars -> draw directly
@@ -587,6 +588,7 @@ Mouse-specific extras:
 - The screen chrome exposes `view` vs `active` mode explicitly in both the frame title and the Artboard info sidebar.
 - The artboard info sidebar shows cursor position, `Owner`, `Cell`, pan availability, brush status, current selection size, and connected peers.
 - The Artboard help overlay mirrors the global help modal style: single-row tabs, TitleCase labels, Amber active chip, `Tab` / `Shift+Tab` switches tabs, `j` / `k` / arrows scroll. Copy lives in `artboard/data.rs` (not pulled from upstream keymap).
+- The global help modal also has an `Artboard` tab. Its copy lives in `late-ssh/src/app/help_modal/data.rs` and is included in `bot_app_context()`, so `@bot` can answer common Artboard questions including daily/monthly snapshots and the web gallery URL.
 - Tab-switching keybindings were unified across modals: both the global help modal and the settings modal use `Tab` / `Shift+Tab` as the canonical tab switcher; arrow/hl routing was dropped from the help modals.
 - In `view` mode, global page switching stays live; in `active` mode, single-key global shortcuts are intentionally suppressed so the editor owns typing.
 - The global app quit-confirm still exists, but `Esc` is reserved for backing Artboard from overlay -> view mode before any screen change.
