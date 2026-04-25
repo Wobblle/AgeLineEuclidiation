@@ -45,11 +45,11 @@ resource "kubernetes_deployment_v1" "service_web" {
           resources {
             limits = {
               cpu    = "250m"
-              memory = "256Mi"
+              memory = "1Gi"
             }
             requests = {
               cpu    = "100m"
-              memory = "128Mi"
+              memory = "256Mi"
             }
           }
 

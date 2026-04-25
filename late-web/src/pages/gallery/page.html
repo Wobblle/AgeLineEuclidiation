@@ -388,17 +388,19 @@
                 this.ctx = this.canvas.getContext('2d');
 
                 this.glyphs = new Map();
-                this.authors = new Map();
-                for (const author of this.snapshot.authors) {
-                    this.authors.set(this.keyFor(author.x, author.y), author.username);
-                }
-                for (const cell of this.snapshot.cells) {
+                this.cells = this.snapshot.cells.map((cell) => ({
+                    x: cell[0],
+                    y: cell[1],
+                    ch: cell[2],
+                    width: cell[3],
+                    fg: cell[4],
+                    author: cell[5] == null ? null : this.snapshot.authors[cell[5]],
+                }));
+                for (const cell of this.cells) {
                     this.glyphs.set(this.keyFor(cell.x, cell.y), cell);
                     if (cell.width === 2 && cell.x + 1 < this.snapshot.width) {
                         this.glyphs.set(this.keyFor(cell.x + 1, cell.y), cell);
-                        if (cell.author) this.authors.set(this.keyFor(cell.x + 1, cell.y), cell.author);
                     }
-                    if (cell.author) this.authors.set(this.keyFor(cell.x, cell.y), cell.author);
                 }
 
                 this.renderSnapshot();
@@ -428,7 +430,7 @@
                 ctx.font = this.fontSize + 'px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace';
                 ctx.textBaseline = 'top';
 
-                for (const cell of this.snapshot.cells) {
+                for (const cell of this.cells) {
                     ctx.fillStyle = cell.fg || '#d1d5db';
                     ctx.fillText(cell.ch, cell.x * this.cellW, cell.y * this.cellH);
                 }
@@ -541,7 +543,7 @@
                 }
                 const key = this.keyFor(x, y);
                 const glyph = this.glyphs.get(key);
-                const author = (glyph && glyph.author) || this.authors.get(key);
+                const author = glyph && glyph.author;
                 const cellText = glyph ? 'cell "' + glyph.ch + '"' : 'empty';
                 const authorText = author ? 'by ' + author : 'no author';
                 this.statusText = x + ',' + y + ' · ' + cellText + ' · ' + authorText;

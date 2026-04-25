@@ -1,4 +1,4 @@
-use std::collections::{BTreeSet, HashMap};
+use std::collections::HashMap;
 
 use anyhow::Context;
 use askama::Template;
@@ -9,7 +9,7 @@ use axum::{
     routing::get,
 };
 use dartboard_core::{Canvas, CellValue, Pos};
-use late_core::models::artboard::Snapshot;
+use late_core::models::artboard::{Snapshot, SnapshotSummary};
 use serde::{Deserialize, Serialize};
 
 use crate::{AppState, error::AppError, metrics};
@@ -62,25 +62,11 @@ struct GallerySnapshotData {
     width: usize,
     height: usize,
     cells: Vec<GalleryCell>,
-    authors: Vec<GalleryAuthor>,
+    authors: Vec<String>,
 }
 
 #[derive(Serialize)]
-struct GalleryCell {
-    x: usize,
-    y: usize,
-    ch: String,
-    width: usize,
-    fg: Option<String>,
-    author: Option<String>,
-}
-
-#[derive(Serialize)]
-struct GalleryAuthor {
-    x: usize,
-    y: usize,
-    username: String,
-}
+struct GalleryCell(usize, usize, String, usize, Option<String>, Option<usize>);
 
 #[tracing::instrument(skip_all)]
 async fn handler(
@@ -94,13 +80,13 @@ async fn handler(
         .get()
         .await
         .context("failed to get db client for gallery")?;
-    let live = Snapshot::find_by_board_key(&client, Snapshot::MAIN_BOARD_KEY)
+    let live = Snapshot::find_summary_by_board_key(&client, Snapshot::MAIN_BOARD_KEY)
         .await
         .context("failed to load live artboard snapshot")?;
-    let daily = Snapshot::list_by_board_key_prefix(&client, DAILY_PREFIX)
+    let daily = Snapshot::list_summaries_by_board_key_prefix(&client, DAILY_PREFIX)
         .await
         .context("failed to load daily artboard snapshots")?;
-    let monthly = Snapshot::list_by_board_key_prefix(&client, MONTHLY_PREFIX)
+    let monthly = Snapshot::list_summaries_by_board_key_prefix(&client, MONTHLY_PREFIX)
         .await
         .context("failed to load monthly artboard snapshots")?;
 
@@ -177,12 +163,7 @@ fn build_selected_snapshot(snapshot: Snapshot) -> anyhow::Result<SelectedSnapsho
         .context("failed to decode artboard provenance")?;
     let data = snapshot_data(&snapshot.board_key, &canvas, &provenance);
     let cell_count = data.cells.len();
-    let author_count = data
-        .authors
-        .iter()
-        .map(|author| author.username.as_str())
-        .collect::<BTreeSet<_>>()
-        .len();
+    let author_count = data.authors.len();
     let snapshot_json = serde_json::to_string(&data)
         .context("failed to serialize gallery snapshot data")?
         .replace("</", "<\\/");
@@ -202,6 +183,8 @@ fn snapshot_data(
     provenance: &GalleryProvenance,
 ) -> GallerySnapshotData {
     let authors = provenance.author_map();
+    let mut author_names = Vec::new();
+    let mut author_indices = HashMap::new();
     let mut cells = Vec::new();
     for (pos, cell) in canvas.iter() {
         let ch = match cell {
@@ -211,33 +194,33 @@ fn snapshot_data(
         let Some(glyph) = canvas.glyph_at(*pos) else {
             continue;
         };
-        cells.push(GalleryCell {
-            x: pos.x,
-            y: pos.y,
-            ch: ch.to_string(),
-            width: glyph.width,
-            fg: glyph.fg.map(rgb_hex),
-            author: authors.get(pos).cloned(),
+        let author = authors.get(pos).map(|username| {
+            if let Some(index) = author_indices.get(username) {
+                *index
+            } else {
+                let index = author_names.len();
+                author_names.push(username.clone());
+                author_indices.insert(username.clone(), index);
+                index
+            }
         });
+        cells.push(GalleryCell(
+            pos.x,
+            pos.y,
+            ch.to_string(),
+            glyph.width,
+            glyph.fg.map(rgb_hex),
+            author,
+        ));
     }
-    cells.sort_by_key(|cell| (cell.y, cell.x));
-
-    let mut authors: Vec<_> = authors
-        .into_iter()
-        .map(|(pos, username)| GalleryAuthor {
-            x: pos.x,
-            y: pos.y,
-            username,
-        })
-        .collect();
-    authors.sort_by_key(|author| (author.y, author.x));
+    cells.sort_by_key(|cell| (cell.1, cell.0));
 
     GallerySnapshotData {
         key: board_key.to_string(),
         width: canvas.width,
         height: canvas.height,
         cells,
-        authors,
+        authors: author_names,
     }
 }
 
@@ -247,7 +230,7 @@ impl GalleryProvenance {
     }
 }
 
-fn nav_item(snapshot: &Snapshot, selected_key: Option<&str>) -> SnapshotNavItem {
+fn nav_item(snapshot: &SnapshotSummary, selected_key: Option<&str>) -> SnapshotNavItem {
     SnapshotNavItem {
         key: snapshot.board_key.clone(),
         label: snapshot_label(&snapshot.board_key),
