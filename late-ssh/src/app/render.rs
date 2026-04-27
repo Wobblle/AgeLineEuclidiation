@@ -252,6 +252,7 @@ impl App {
         let news_view = chat::news::ui::ArticleListView {
             articles: self.chat.news.all_articles(),
             selected_index: self.chat.news.selected_index(),
+            marker_read_at: self.chat.news.marker_read_at(),
         };
         let discover_view = chat::discover::ui::DiscoverListView {
             items: self.chat.discover.all_items(),
@@ -261,6 +262,15 @@ impl App {
             items: self.chat.notifications.all_items(),
             selected_index: self.chat.notifications.selected_index(),
         };
+        let showcase_view = chat::showcase::ui::ShowcaseListView {
+            items: self.chat.showcase.all_items(),
+            selected_index: self.chat.showcase.selected_index(),
+            current_user_id: self.user_id,
+            is_admin: self.chat.showcase.is_admin(),
+            marker_read_at: self.chat.showcase.marker_read_at(),
+        };
+        let showcase_unread_count = self.chat.showcase.unread_count();
+        let showcase_composing = self.chat.showcase.composing();
         let chat_view = chat::ui::ChatRenderInput {
             news_selected: self.chat.news_selected,
             news_unread_count: self.chat.news.unread_count(),
@@ -296,6 +306,11 @@ impl App {
             notifications_selected: self.chat.notifications_selected,
             notifications_unread_count: self.chat.notifications.unread_count(),
             notifications_view,
+            showcase_selected: self.chat.showcase_selected,
+            showcase_unread_count,
+            showcase_view,
+            showcase_state: Some(&self.chat.showcase),
+            showcase_composing,
         };
         self.settings_modal_state
             .set_modal_width(settings_modal::ui::MODAL_WIDTH);

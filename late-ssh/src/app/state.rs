@@ -105,6 +105,7 @@ pub struct SessionConfig {
     pub chat_service: ChatService,
     pub notification_service: NotificationService,
     pub article_service: ArticleService,
+    pub showcase_service: crate::app::chat::showcase::svc::ShowcaseService,
     pub profile_service: ProfileService,
     pub twenty_forty_eight_service:
         crate::app::games::twenty_forty_eight::svc::TwentyFortyEightService,
@@ -679,6 +680,7 @@ impl App {
                 config.is_admin,
                 active_users.clone(),
                 config.article_service.clone(),
+                config.showcase_service.clone(),
             ),
             dashboard_chat_rows_cache: chat::ui::ChatRowsCache::default(),
             active_room_rows_cache: chat::ui::ChatRowsCache::default(),
@@ -692,6 +694,7 @@ impl App {
             ),
             profile_modal_state: profile_modal::state::ProfileModalState::new(
                 config.profile_service.clone(),
+                config.showcase_service.clone(),
             ),
             settings_modal_state,
             leaderboard_rx: config.leaderboard_rx,
