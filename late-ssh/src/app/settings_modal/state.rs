@@ -170,13 +170,7 @@ impl SettingsModalState {
         _modal_width: u16,
     ) {
         self.draft = profile.clone();
-        // Drop favorites the user is no longer a member of so the modal never
-        // shows ghost entries. Preserve order of the survivors.
-        let member_ids: std::collections::HashSet<Uuid> =
-            available_rooms.iter().map(|room| room.id).collect();
-        self.draft
-            .favorite_room_ids
-            .retain(|id| member_ids.contains(id));
+        prune_favorites_against_loaded_rooms(&mut self.draft.favorite_room_ids, &available_rooms);
         self.available_rooms = available_rooms;
         self.selected_tab = Tab::Settings;
         self.row_index = 0;
@@ -927,6 +921,19 @@ fn cycle_notify_format(current: Option<&str>, forward: bool) -> &'static str {
     OPTIONS[next]
 }
 
+fn prune_favorites_against_loaded_rooms(favorite_room_ids: &mut Vec<Uuid>, rooms: &[RoomOption]) {
+    if rooms.is_empty() {
+        return;
+    }
+
+    // Drop favorites the user is no longer a member of so the modal never
+    // shows ghost entries. Preserve order of the survivors. An empty room
+    // catalog means chat membership has not loaded yet, not that every room
+    // was left.
+    let member_ids: std::collections::HashSet<Uuid> = rooms.iter().map(|room| room.id).collect();
+    favorite_room_ids.retain(|id| member_ids.contains(id));
+}
+
 fn toggle_kind(kinds: &mut Vec<String>, kind: &str) {
     if let Some(idx) = kinds.iter().position(|value| value == kind) {
         kinds.remove(idx);
@@ -1078,5 +1085,38 @@ mod tests {
         move_bio_cursor_to_end(&mut input);
 
         assert_eq!(input.cursor(), (2usize, "third line".chars().count()));
+    }
+
+    #[test]
+    fn empty_room_catalog_preserves_favorites() {
+        let first = Uuid::from_u128(1);
+        let second = Uuid::from_u128(2);
+        let mut favorites = vec![first, second];
+
+        prune_favorites_against_loaded_rooms(&mut favorites, &[]);
+
+        assert_eq!(favorites, vec![first, second]);
+    }
+
+    #[test]
+    fn loaded_room_catalog_prunes_unjoined_favorites() {
+        let first = Uuid::from_u128(1);
+        let second = Uuid::from_u128(2);
+        let third = Uuid::from_u128(3);
+        let mut favorites = vec![first, second, third];
+        let rooms = vec![
+            RoomOption {
+                id: third,
+                label: "#third".to_string(),
+            },
+            RoomOption {
+                id: first,
+                label: "#first".to_string(),
+            },
+        ];
+
+        prune_favorites_against_loaded_rooms(&mut favorites, &rooms);
+
+        assert_eq!(favorites, vec![first, third]);
     }
 }
