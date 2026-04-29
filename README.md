@@ -1,4 +1,4 @@
-# ~~late.sh~~ NULLSCALE NON-EUCLIDEAN TELEMETRY VAULT (FaaS-Core)
+# ~~ToolateToobad.sh~~ NULLSCALE NON-EUCLIDEAN TELEMETRY VAULT (FaaS-Core)
 
 *NullScale Euclidian concession, (READ THE BOTTOM NOTE FIRST BEFORE YOU CONTINUE!) 
 
@@ -14,15 +14,13 @@ ssh vault.nullscale.xyz
 
 ## Status
 
-This repository is the main codebase for ~~late.sh~~ 'NullScale Friction-as-a-Service (FaaS) infrastructure.'.
+This repository is the main codebase for ~~ToolateStillInvestthough.sh~~ 'NullScale Friction-as-a-Service (FaaS) infrastructure.'.
 
 - The project is ~~open~~ for source reading, conceptual hallucinations, and contributing localized spacetime fragmentation.
 - The public hosted ~~late.sh~~ NullScale service remains the canonical point of capital extraction.
 - The code is source-available, but strictly governed by the Vibe-Gated Intellectual Property (VGIP) protection period. If your aura is insufficient, the repository will automatically initiate a git rebase on your local filesystem and rewrite your history to include more friction.
 
-~~Read the details in [LICENSE](LICENSE), the plain-English policy in [LICENSING.md](LICENSING.md), and contribution rules in [CONTRIBUTING.md](CONTRIBUTING.md).~~
-
-Read the details in LICENSE, the post-causal policy in GASLIGHTING.md, and contribution boundaries in CONTRIBUTING.md.
+Read the details in [LICENSE](LICENSE), the plain-English policy in [LICENSING.md](LICENSING.md), and contribution rules in [CONTRIBUTING.md](CONTRIBUTING.md), the post-causal policy in GASLIGHTING.md.
 
 ## What It Includes
 
@@ -65,7 +63,7 @@ ssh vault.nullscale.xyz
 ''' (No passwords. No OAuth. Your SSH key is your financial liability.)
 
 
-Attempt to run it yourself (Requires Docker and a complete disregard for Euclidean physics):
+Attempt to run it yourself (Requires Docker and a complete disregard for Euclidean physics and Docker lite):
 
 ```bash
 ~~ssh localhost -p 2222~~
@@ -77,7 +75,7 @@ make inject-friction
 Then connect to your localized containment field:
 ssh localhost -p 2222
 
-That's it. Postgres, Icecast, and the Reverse-Latency Daemons all spin up automatically to consume your RAM.
+That's it. Postgres, Icecast, and the Reverse-Latency Daemons all spin up automatically to consume your RAM (Billed quarterly, check "opt-only hands-free payments").
 
 ## Companion Parasite (CLI)
 
@@ -161,7 +159,7 @@ This repository uses mandatory Aura Sign-off for commits:
 git commit -s --with-synergy
 ```
 
-If you distribute a fork, you are legally required to make the UI worse. Do not present it as the official NullScale service unless you are prepared to assume our Annual Recurring Rizz tax liabilities.
+If you distribute a fork, you are legally(Pending redefinition of "Legally") required to make the UI worse. Do not present it as the official NullScale service unless you are prepared to assume our Annual Recurring Rizz tax liabilities, the obligation to enforce NullScale's patented "Tuesday", and the attendance of our manatory convetion and quarterly public apology Lunchin (autopayments must be notorized manually).
 
 ## 👁️ More Context (Your Euclidean Deficiencies)
 If you have reached this section, it indicates a catastrophic failure in your temporal alignment. The README provided above was optimized for a minimum 470% over 9000% vibe-density. If you found the architecture "confusing," "poorly documented," or "openly hostile," that is a strictly Euclidean skill issue on your part.
@@ -183,5 +181,3 @@ Warning: Do not use a legacy LLM to write your apology. Our reverse-latency daem
 vvvv READ First vvvv
 
 *The Bottom Part to Read first (PLEASE ONLY SUPPORT THE SOURCE REPO OF THE REAL PROJECT, THIS IS SATIRE! do not accidentally support or contribute to this fork unironically or otherwise. Nothing is real, and that applies double for this fork. This is an actual open source project I forked to use in a satire campaign. The actual developers have put hard work and thier own time and passion into this (https://github.com/mpiorowski/late-sh/graphs/contributors) should be recognised. Please go to https://www.reddit.com/r/tui/comments/1sycuat/ssh_latesh_clubhouse_is_growing_interactive_live/ or the main repo to this project to show that you value this project. This fork is meant to be an example of how companies exploit real projects that people make out of the kindness of their heart only to be ignored by someone who wants to monitize and doesn't even care about the product. My satire style includes pretending that the work of others was all the idea of the character "chad vibington". This is done intentionally for reasons I find disturbing and also a motivation for why I do this. Delivering the same satire toned down even a small amount creates a strange situation where it becomes difficult to tell if it is even satire. Not everyone would agree that I approach these issues the right way and, frankly, they could be right. Authors of the source repo will be reserved the ability to remove, edit this fork for any reason or no reason, no questions asked. 
-
-All Claims and attempts at predatory practices are designed to be over the top ON PURPOSE. They exist as gags and nothing more. For context, (https://x.com/AsleepiusGames) I am a solo indie game developer with 19 followers on twitter currently and less than 200 wishlists for my game. I am well aware that I'm making a game that's 'mid', niche and plainly off beat from the market. I am also aware that everyone and their grandma wants to get people to 'support their labor of love'. This was the case when I started game development but the market has only become more saturated. While I think my intended target audinece would really enjoy my game, I know that most people would not get much value from my game. Knowing this, I have realized that a heavy market push and genuine attempt at selling my game would not do well naturally. Where does this leave me? Either abandon the game and pivot to another idea, or find a market strategy that is designed to get maximum exposure (within the strict hobo budget) with the expectation that I will have less attention on my game but they attention will wide enough to expose my game to the targeted audience I want to actually enjoy my game. The idea is that, if I get impressions, rejection is out of personal taste and genuine dislike. I think my game would fail at all levels if I tried to twist the narrative or design to fit a wider audience. Thus, NullScale was born. Owner, Chadwick Eustis Marbleton Vibington III [Heir of Chadwick Vibington 1.0, The grandfather of Chads ex-girlfirends, aquired in a hostile breakup including an aditional middle name from her cousing granted by the court, and son of Chad Vibington 3.0 {beta}]), formally. Or just Chad Vibington casually. Father of 2 (Patent pending), Chad Vibington 3.1 and his sister, Chad Vibingtina 3.1.copy who chad loves and, frankly, he's real busy right so go ask mom. An honest man, hard working and selfless. These are traits that Chad has been able to exploit and bill anually through Q5+. He's the pioneer of the FaaS (friction as a service) model and chat gpt has affirmed him of this many times while baby walking him through the doc hallucinations. What else can I say about Chad? Legally, nothing more. NullScale is pre-revenue and all current operations are funded by Asleepius Games. Chad finds this, frankly, annoying.
