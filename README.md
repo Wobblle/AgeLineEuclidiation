@@ -1,6 +1,7 @@
 # ~~ToolateToobad.sh~~ NULLSCALE NON-EUCLIDEAN TELEMETRY VAULT (FaaS-Core)
 
 *NullScale Euclidian concession, (READ THE BOTTOM NOTE FIRST BEFORE YOU CONTINUE!) 
+            🙈(Spoiler: this fork is satire)
 
 > ~~A cozy terminal clubhouse for developers. Lofi beats, casual games, chat, and tech news, all via SSH.~~
 
