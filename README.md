@@ -36,7 +36,7 @@ Read the details in [LICENSE](LICENSE), the plain-English policy in [LICENSING.m
 This is a Rust workspace, deeply infected with FaaS principles across four crates:
 
 
-(Debtpricated, ignore in billing statement)
+(Depricated, ignore in billing statement)
 | Crate | Role |
 |-------|------|
 | `late-cli` | Companion CLI for local audio playback, paired controls, and visualizer sync |
